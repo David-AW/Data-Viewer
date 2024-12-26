@@ -47,8 +47,6 @@ public class DataViewer implements UserSettings{
 	private static JScrollBar scrollbar_numbers;
 	private static DataFrameStorage data_store;
 	
-	// Test Commit
-	
 	/**
 	 * Launch the application.
 	 */

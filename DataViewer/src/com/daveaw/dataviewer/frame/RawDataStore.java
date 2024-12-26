@@ -97,7 +97,7 @@ public class RawDataStore extends DataFrameStorage{
 				
 			}
 			
-			data.add(new DataFrame(bytes, bits_in_line));
+			data.add(new DataFrame(bytes, bits_in_line, data.size()));
 			
 		}
 	}

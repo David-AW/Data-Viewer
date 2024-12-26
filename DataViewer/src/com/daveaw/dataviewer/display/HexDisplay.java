@@ -15,11 +15,12 @@ import javax.swing.JPanel;
 
 import com.daveaw.dataviewer.DataViewer;
 import com.daveaw.dataviewer.UserSettings;
+import com.daveaw.dataviewer.frame.DataFrame;
 
 public class HexDisplay extends JPanel implements UserSettings, AdjustmentListener{
 
 	private static final long serialVersionUID = 1L;
-	private final String[] HEXMAP = {"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"};
+	
 	
 	private final int PADDING = 6;
 	
@@ -114,8 +115,8 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 		g2d.rotate(Math.toRadians(90));
 		
 		for (int y = 0; y < nums_to_render; y++) {
-			byte[] data = DataViewer.getDataStore().storage().get(starting_num + y).getData();
-			fields_to_render = data.length - starting_field > cell_count_horizontal ? cell_count_horizontal : data.length - starting_field;
+			DataFrame data = DataViewer.getDataStore().storage().get(starting_num + y);
+			fields_to_render = data.count() - starting_field > cell_count_horizontal ? cell_count_horizontal : data.count() - starting_field;
 			
 			g.setColor(background_sub_frame);
 			g.draw3DRect(0, y*cell_height+fields_row_height, numbers_column_width, cell_height-1, true);
@@ -127,12 +128,12 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 			g.drawString(number+"", numbers_column_width - ((number+"").length() * char_width), y*cell_height + char_height_offset + fields_row_height + ((cell_height / 2)-(char_height_offset/2)));
 			for (int field = 0; field < fields_to_render; field++) {
 				g.setColor(foreground);
-				g.drawString(toHexString(data[field+starting_field]), cell_width*field + (cell_width/2 - char_width) + numbers_column_width, y*cell_height + char_height_offset + fields_row_height);
+				g.drawString(data.getHexValueAt(field+starting_field), cell_width*field + (cell_width/2 - char_width) + numbers_column_width, y*cell_height + char_height_offset + fields_row_height);
 				g.setColor(foreground.darker());
 				if (currentDisplayType == DisplayType.ASCII) {
-					g.drawString(getAsciiValue(data[field+starting_field]), cell_width*field + (cell_width/2 - char_width/2) + numbers_column_width, y*cell_height + char_height_offset*2 + fields_row_height);
+					g.drawString(getAsciiValue(data.getData()[field+starting_field]), cell_width*field + (cell_width/2 - char_width/2) + numbers_column_width, y*cell_height + char_height_offset*2 + fields_row_height);
 				}else if (currentDisplayType == DisplayType.DECIMAL) {
-					String decimal_value = Byte.toUnsignedInt(data[field+starting_field])+"";
+					String decimal_value = Byte.toUnsignedInt(data.getData()[field+starting_field])+"";
 					g.drawString(decimal_value, cell_width*field + (cell_width/2 - char_width/2) + numbers_column_width - ((decimal_value.length()-1) * char_width / 2), y*cell_height + char_height_offset*2 + fields_row_height + char_height_offset/4);
 				}
 			}
@@ -186,10 +187,6 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 		setFont(font);
 		setForeground(foreground);
 		setBackground(background_display);
-	}
-	
-	public String toHexString(byte b) {
-		return HEXMAP[(b&0xF0)>>>4] + HEXMAP[b&0xF];
 	}
 	
 	public String getAsciiValue(byte b) {
