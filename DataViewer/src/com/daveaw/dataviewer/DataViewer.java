@@ -7,10 +7,14 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 import com.daveaw.dataviewer.display.HexDisplay;
 import com.daveaw.dataviewer.frame.DataFrameStorage;
@@ -19,6 +23,8 @@ import com.daveaw.dataviewer.io.RawFileImporter;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -26,6 +32,8 @@ import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.BorderFactory;
 import java.awt.FlowLayout;
 
@@ -46,6 +54,8 @@ public class DataViewer implements UserSettings{
 	private static JScrollBar scrollbar_fields;
 	private static JScrollBar scrollbar_numbers;
 	private static DataFrameStorage data_store;
+	
+	private String width = "512";
 	
 	/**
 	 * Launch the application.
@@ -72,7 +82,7 @@ public class DataViewer implements UserSettings{
 		filechooser.showDialog(null, "Import Raw");
 		data_store = RawFileImporter.importData(filechooser.getSelectedFile());
 		if (data_store instanceof RawDataStore) 
-			((RawDataStore)data_store).setWidth(512);
+			((RawDataStore)data_store).setWidth(Integer.parseInt(width));
 		display.repaint();
 	}
 	
@@ -133,13 +143,67 @@ public class DataViewer implements UserSettings{
 		lbl_width.setHorizontalAlignment(SwingConstants.RIGHT);
 		
 		txt_width = new JTextField();
-		txt_width.setEnabled(false);
+		txt_width.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				processDocumentChange(e.getDocument());
+			}
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				processDocumentChange(e.getDocument());
+			}
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+		});
+		txt_width.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				changeWidth(e.getActionCommand());
+			}
+		});
+		//txt_width.setEnabled(false);
 		pnl_toolbar.add(txt_width);
 		txt_width.setHorizontalAlignment(SwingConstants.CENTER);
-		txt_width.setText("512");
+		txt_width.setText(width);
 		txt_width.setColumns(10);
 		
 		updateUserSettings();
+	}
+	
+	private void processDocumentChange(Document doc) {
+		String compare = width;
+		try {
+			compare = doc.getText(0, doc.getLength());
+		} catch (BadLocationException e) {}
+		if (compare.equals(width)) {
+			txt_width.setForeground(foreground);
+			txt_width.setBackground(background_sub_frame);
+		}else {
+			txt_width.setForeground(Color.DARK_GRAY);
+			txt_width.setBackground(UserSettings.background_changed_field);
+		}
+	}
+	
+	private void changeWidth(String input) {
+		int bit_width = 0;
+		try {
+			bit_width = Integer.parseInt(input);
+		}catch(NumberFormatException e) {
+			JOptionPane.showMessageDialog(txt_width, "This field only accepts numbers!");
+			return;
+		}
+		if (bit_width < 1) {
+			JOptionPane.showMessageDialog(txt_width, "Enter a number larger than 0.");
+			return;
+		}
+		txt_width.setForeground(foreground);
+		txt_width.setBackground(background_sub_frame);
+		width = input;
+		if (data_store != null && data_store instanceof RawDataStore) {
+			RawDataStore rds = (RawDataStore) data_store;
+			rds.setWidth(bit_width);
+			display.repaint();
+		}
 	}
 	
 	public void updateUserSettings() {
@@ -210,6 +274,10 @@ public class DataViewer implements UserSettings{
 		UIManager.getLookAndFeelDefaults().put("MenuItem.selectionForeground", foreground_highlight_res);
 		UIManager.getLookAndFeelDefaults().put("MenuItem.font", menu_font_res);
 		UIManager.getLookAndFeelDefaults().put("MenuItem.borderPainted", false);
+		
+		UIManager.getLookAndFeelDefaults().put("OptionPane.background", background_res);
+		UIManager.getLookAndFeelDefaults().put("OptionPane.foreground", foreground_res);
+		UIManager.getLookAndFeelDefaults().put("OptionPane.messageForeground", foreground_res);
 		
 		UIManager.getLookAndFeelDefaults().put("PopupMenu.background", background_res);
 		UIManager.getLookAndFeelDefaults().put("PopupMenu.foreground", foreground_res);
