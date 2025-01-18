@@ -368,6 +368,28 @@ public final class DataFrame {
 	}
 	
 	/**
+	 * Returns the hexadecimal representation of this data frame with the specified string separating the data.
+	 * @return the hexadecimal representation of this data frame
+	 */
+	public String toString(String divider) {
+		String out = "";
+		for (byte b : data)
+			out += HEXMAP[(b&0xF0)>>>4] + HEXMAP[b&0xF] + divider;
+		return out;
+	}
+	
+	/**
+	 * Returns the binary representation of this data frame.
+	 * @return the binary representation of this data frame
+	 */
+	public String toBinaryString() {
+		String out = "";
+		for (byte b : data)
+			out += Integer.toBinaryString(b);
+		return out;
+	}
+	
+	/**
 	 * Returns the amount of bits in this data frame.
 	 * @return the amount of bits in this data frame
 	 */
