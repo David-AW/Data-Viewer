@@ -55,7 +55,7 @@ public class DataViewer implements UserSettings{
 	private static JScrollBar scrollbar_numbers;
 	private static DataFrameStorage data_store;
 	
-	public static int x, y, x1, y1;
+	private static int x, y, x1, y1;
 	
 	private String width = "512";
 	
@@ -301,6 +301,11 @@ public class DataViewer implements UserSettings{
 		DataViewer.x = x;
 		DataViewer.x1 = x;
 		DataViewer.y = y;
+		DataViewer.y1 = y;
+	}
+	
+	public static void setSecondSelectionPoint(int x, int y) {
+		DataViewer.x1 = x;
 		DataViewer.y1 = y;
 	}
 	

@@ -173,8 +173,7 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 	
 	private void dragged(MouseEvent e) {
 		if (is_mouse_down) {
-			DataViewer.x1 = screenPosToGridPosX(e.getX()) + starting_field;
-			DataViewer.y1 = screenPosToGridPosY(e.getY()) + starting_num;
+			DataViewer.setSecondSelectionPoint(screenPosToGridPosX(e.getX()) + starting_field, screenPosToGridPosY(e.getY()) + starting_num);
 			//System.out.println(DataViewer.x + ", " + DataViewer.y + " | " + DataViewer.x1 + ", " + DataViewer.y1);
 			repaint();
 		}
