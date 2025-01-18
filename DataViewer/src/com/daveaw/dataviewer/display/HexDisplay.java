@@ -21,16 +21,21 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 
 	private static final long serialVersionUID = 1L;
 	
-	
 	private final int PADDING = 6;
 	
 	private int char_width;
 	private int char_height_offset;
-	private int cell_width;
-	private int cell_height;
+	private int cell_width = 1;
+	private int cell_height = 1;
 	private int cell_count_horizontal;
 	private int cell_count_vertical;
+	private boolean is_mouse_down = false;
 
+	int numbers_column_width;
+	int fields_row_height;
+	int starting_num;
+	int starting_field;
+	
 	private final int instance_index;
 	private static int instance_count = 0;
 	
@@ -89,19 +94,20 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 		calculate_cell_sizes(g);
 		Graphics2D g2d = (Graphics2D) g;
 		
-		int numbers_column_width = char_width * (DataViewer.getDataStore().getCount()+"").length() + PADDING;
-		int fields_row_height = char_width * (DataViewer.getDataStore().getMaxLength()+"").length() + PADDING;
+		numbers_column_width = char_width * (DataViewer.getDataStore().getCount()+"").length() + PADDING;
+		fields_row_height = char_width * (DataViewer.getDataStore().getMaxLength()+"").length() + PADDING;
 		
 		g.setColor(background_sub_frame);
 		g.fillRect(0, fields_row_height, numbers_column_width, getHeight());
 		
-		int starting_num = DataViewer.getScrollbarNumbers().getValue();
-		int starting_field = DataViewer.getScrollbarFields().getValue();
-		int remaining_numbers = DataViewer.getDataStore().getCount() - starting_num;
+		starting_num = DataViewer.getScrollbarNumbers().getValue();
+		starting_field = DataViewer.getScrollbarFields().getValue();
+		int remaining_numbers = DataViewer.getDataStore().getCount() - starting_num; // Only used to determine remaining numbers to render in the variable below
 		int nums_to_render = remaining_numbers > cell_count_vertical ? cell_count_vertical : remaining_numbers;
 		int fields_to_render = DataViewer.getDataStore().getMaxLength() - starting_field > cell_count_horizontal ? cell_count_horizontal : DataViewer.getDataStore().getMaxLength() - starting_field;
 		
 		g.fillRect(0, 0, getWidth(), fields_row_height);
+		
 		for (int x = 0; x < fields_to_render; x++) {
 			g.draw3DRect(numbers_column_width + cell_width * x, 0, cell_width-1, fields_row_height-1, true);
 		}
@@ -123,6 +129,7 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 			
 			g.setColor(background);
 			g.fillRect(numbers_column_width, y*cell_height + fields_row_height, fields_to_render * cell_width, cell_height);
+		
 			g.setColor(foreground);
 			int number = y + starting_num;
 			g.drawString(number+"", numbers_column_width - ((number+"").length() * char_width), y*cell_height + char_height_offset + fields_row_height + ((cell_height / 2)-(char_height_offset/2)));
@@ -143,21 +150,48 @@ public class HexDisplay extends JPanel implements UserSettings, AdjustmentListen
 		DataViewer.getScrollbarNumbers().setValues(starting_num, cell_count_vertical, 0, DataViewer.getDataStore().getCount()+cell_count_vertical-1);
 	}
 
+	
 	private void pressed(MouseEvent e) {
 		requestFocus();
 		if (e.getButton() == MouseEvent.BUTTON3 && !popup.isVisible()) {
 			popup.show(this, e.getX(), e.getY());
+		}else if (e.getButton() == MouseEvent.BUTTON1) {
+			//System.out.println(screenPosToGridPosX(e.getX()) + ", " + screenPosToGridPosY(e.getY()));
+			DataViewer.setSelectionPoint(screenPosToGridPosX(e.getX()) + starting_field, screenPosToGridPosY(e.getY()) + starting_num);
+			//System.out.println(DataViewer.x + ", " + DataViewer.y + " | " + DataViewer.x1 + ", " + DataViewer.y1);
+			is_mouse_down = true;
+			
+			repaint();
 		}
 	}
 
 	private void released(MouseEvent e) {
-
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			is_mouse_down = false;
+		}
 	}
 	
 	private void dragged(MouseEvent e) {
-
+		if (is_mouse_down) {
+			DataViewer.x1 = screenPosToGridPosX(e.getX()) + starting_field;
+			DataViewer.y1 = screenPosToGridPosY(e.getY()) + starting_num;
+			//System.out.println(DataViewer.x + ", " + DataViewer.y + " | " + DataViewer.x1 + ", " + DataViewer.y1);
+			repaint();
+		}
 	}
 
+	private int screenPosToGridPosX(int x) {
+		if (x < numbers_column_width)
+			return -1;
+		return (x - numbers_column_width) / cell_width;
+	}
+	
+	private int screenPosToGridPosY(int y) {
+		if (y < fields_row_height)
+			return -1;
+		return (y - fields_row_height) / cell_height;
+	}
+	
 	private void calculate_cell_sizes(Graphics g) {
 		g.setFont(font);
 		char_width = g.getFontMetrics().charWidth(' ');

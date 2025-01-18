@@ -55,6 +55,8 @@ public class DataViewer implements UserSettings{
 	private static JScrollBar scrollbar_numbers;
 	private static DataFrameStorage data_store;
 	
+	public static int x, y, x1, y1;
+	
 	private String width = "512";
 	
 	/**
@@ -293,6 +295,29 @@ public class DataViewer implements UserSettings{
 		
 		SwingUtilities.updateComponentTreeUI(application_window);
 		display.updateUserSettings();
+	}
+	
+	public static void setSelectionPoint(int x, int y) {
+		DataViewer.x = x;
+		DataViewer.x1 = x;
+		DataViewer.y = y;
+		DataViewer.y1 = y;
+	}
+	
+	public static int getSelectionWidth() {
+		return Math.abs(x1 - x) + 1;
+	}
+	
+	public static int getSelectionHeight() {
+		return Math.abs(y1 - y) + 1;
+	}
+	
+	public static int getSelectionStartX() {
+		return x <= x1 ? x : x1;
+	}
+	
+	public static int getSelectionStartY() {
+		return y <= y1 ? y : y1;
 	}
 	
 	public static DataFrameStorage getDataStore() {
