@@ -55,7 +55,7 @@ public class DataViewer implements UserSettings{
 	private static JScrollBar scrollbar_numbers;
 	private static DataFrameStorage data_store;
 	
-	private static int x, y, x1, y1;
+	private static int x = -1, y = x, x1 = x, y1 = x;
 	
 	private String width = "512";
 	
@@ -309,6 +309,18 @@ public class DataViewer implements UserSettings{
 		DataViewer.y1 = y;
 	}
 	
+	public static boolean hasSelection() {
+		return x >= 0 || y >= 0;
+	}
+	
+	public static boolean isSelectingField() {
+		return y < 0;
+	}
+	
+	public static boolean isSelectingNumber() {
+		return x < 0;
+	}
+	
 	public static int getSelectionWidth() {
 		return Math.abs(x1 - x) + 1;
 	}
@@ -323,6 +335,14 @@ public class DataViewer implements UserSettings{
 	
 	public static int getSelectionStartY() {
 		return y <= y1 ? y : y1;
+	}
+	
+	public static int getSelectionEndX() {
+		return getSelectionStartX() + getSelectionWidth();
+	}
+	
+	public static int getSelectionEndY() {
+		return getSelectionStartY() + getSelectionHeight();
 	}
 	
 	public static DataFrameStorage getDataStore() {
