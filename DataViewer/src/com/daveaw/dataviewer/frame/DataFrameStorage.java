@@ -20,4 +20,17 @@ public class DataFrameStorage {
 		return data;
 	}
 	
+	public int getMaxLengthFrameFromRange(int start, int end) {
+		int max = 0;
+		for (int i = start; i < end; i++) {
+			if (data.get(i).count() > max)
+				max = data.get(i).count();
+		}
+		return max;
+	}
+	
+	public int getMaxLengthFrameFromNumber(int start) {
+		return getMaxLengthFrameFromRange(start, data.size());
+	}
+	
 }

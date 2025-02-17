@@ -368,6 +368,17 @@ public final class DataFrame {
 	}
 	
 	/**
+	 * Returns the binary representation of this data frame.
+	 * @return the binary representation of this data frame
+	 */
+	public String toBinaryString() {
+		String out = "";
+		for (byte b : data)
+			out += Integer.toBinaryString(b);
+		return out;
+	}
+	
+	/**
 	 * Returns the amount of bits in this data frame.
 	 * @return the amount of bits in this data frame
 	 */
